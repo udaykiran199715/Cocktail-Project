@@ -25,7 +25,11 @@ class Cocktail extends React.Component {
             glass: 'Glass',
             ingredientSelect: 'Ingredients',
             alcoholSelect: 'A / N-A',
-            cag: []
+            cag: [],
+            dataLength:0,
+            pages:[],
+            activePage:1,
+            pageFlag:false
         }
     }
 
@@ -50,7 +54,8 @@ class Cocktail extends React.Component {
                     cag: res.data.drinks,
                     dataFlag: false,
                     searchData: [],
-                    ingredientData: []
+                    ingredientData: [],
+                    dataLength:res.data.drinks.length
 
                 })
                 // console.log(res)
@@ -67,7 +72,9 @@ class Cocktail extends React.Component {
                     ingredientData: res.data.ingredients,
                     dataFlag: false,
                     searchData: [],
-                    cag: []
+                    cag: [],
+                    pages:[],
+                    dataLength:0,
                 })
             )
     }
@@ -84,7 +91,9 @@ class Cocktail extends React.Component {
                     cag: res.data.drinks,
                     dataFlag: false,
                     searchData: [],
-                    ingredientData: []
+                    ingredientData: [],
+                    dataLength:res.data.drinks.length,
+                    pages:[]
                 })
                 // console.log(res)
             )
@@ -101,7 +110,9 @@ class Cocktail extends React.Component {
                     cag: res.data.drinks,
                     dataFlag: false,
                     searchData: [],
-                    ingredientData: []
+                    ingredientData: [],
+                    dataLength:res.data.drinks.length,
+                    pages:[]
                 })
                 // console.log(res)
             )
@@ -110,10 +121,10 @@ class Cocktail extends React.Component {
 
 
 
-    handleSubmit = (e) => {
+   handleSubmit = (e) => {
         let { name, ingredient } = this.state
 
-        if(e.target.name ==='search') {
+        // if(e.target.name ==='search') {
         if (name) {
             // console.log(name)
 
@@ -122,7 +133,9 @@ class Cocktail extends React.Component {
                     this.setState({
                         searchData: res.data.drinks,
                         dataFlag: true,
-                        cag: []
+                        cag: [],
+                        dataLength:res.data.drinks.length,
+                        pages:[]
                     })
                 ).catch(err=>alert("oops not found"))
         } else if (ingredient) {
@@ -132,91 +145,126 @@ class Cocktail extends React.Component {
                     this.setState({
                         ingredientData: res.data.ingredients,
                         dataFlag: false,
-                        cag: []
+                        cag: [],
+                        pages:[],
+                        dataLength:0
                     })
                 ).catch(err => alert('oops not found'))
         }
-        }else {
-            axios.get("https://www.thecocktaildb.com/api/json/v1/1/random.php")
-            .then(res =>
-                this.setState({
-                    searchData: res.data.drinks,
-                    dataFlag: true,
-                    cag: []
-                })
-            )
-        }
+        // }else {
+        //     axios.get("https://www.thecocktaildb.com/api/json/v1/1/random.php")
+        //     .then(res =>
+        //         this.setState({
+        //             searchData: res.data.drinks,
+        //             dataFlag: true,
+        //             cag: [],
+        //              dataLength:0,
+        //              pages:[]
+        //         })
+        //     )
+        // }
 
         this.setState({
             name: '', ingredient: ''
         })
     }
 
-    // componentDidMount() {
-    //     axios.get("https://www.thecocktaildb.com/api/json/v1/1/list.php?c=list")
-    //         .then(res =>
-    //             this.setState({
-    //                 categoriesList: res.data.drinks
-    //             })
-    //             // console.log(res.data.drinks)
-    //         )
-    //     axios.get("https://www.thecocktaildb.com/api/json/v1/1/list.php?i=list")
-    //         .then(res =>
-    //             this.setState({
-    //                 ingredientsList: res.data.drinks
-    //             })
-    //         )
-    //     axios.get("https://www.thecocktaildb.com/api/json/v1/1/list.php?g=list")
-    //         .then(res =>
-    //             this.setState({
-    //                 glassList: res.data.drinks
-    //             })
-    //         )
-    //     axios.get("https://www.thecocktaildb.com/api/json/v1/1/list.php?a=list")
-    //         .then(res =>
-    //             this.setState({
-    //                 alcoholList: res.data.drinks
-    //             })
-    //         )
-    // }
+    handlePages = (e,active) => {
+        this.setState({
+            activePage:active
+        })
+    }
+    componentDidMount() {
+        axios.get("https://www.thecocktaildb.com/api/json/v1/1/list.php?c=list")
+            .then(res =>
+                this.setState({
+                    categoriesList: res.data.drinks
+                })
+                // console.log(res.data.drinks)
+            )
+        axios.get("https://www.thecocktaildb.com/api/json/v1/1/list.php?i=list")
+            .then(res =>
+                this.setState({
+                    ingredientsList: res.data.drinks
+                })
+            )
+        axios.get("https://www.thecocktaildb.com/api/json/v1/1/list.php?g=list")
+            .then(res =>
+                this.setState({
+                    glassList: res.data.drinks
+                })
+            )
+        axios.get("https://www.thecocktaildb.com/api/json/v1/1/list.php?a=list")
+            .then(res =>
+                this.setState({
+                    alcoholList: res.data.drinks
+                })
+            )
+        axios.get("https://www.thecocktaildb.com/api/json/v1/1/search.php?f=v")
+        .then(res =>
+            this.setState({
+                searchData:res.data.drinks,
+                dataFlag:true,
+                dataLength:res.data.drinks.length
+            })
+            )
+
+
+    }
 
     render() {
-        let { name, ingredient, searchData, ingredientData, dataFlag, categories, categoriesList, ingredientSelect, ingredientsList, glass, glassList, alcoholList, alcoholSelect, cag } = this.state
+       // console.log(this.state.dataLength)
+
+        let { name, ingredient, searchData, ingredientData, dataFlag, categories, categoriesList, ingredientSelect, ingredientsList, glass, glassList, alcoholList, alcoholSelect, cag, pages, dataLength, activePage } = this.state
+        let total = dataLength
+        let perPage = 4
+        let pageCount = Math.ceil(total/perPage)
+        if(pages.length === 0) {
+        for(let i=0;i<pageCount;i++) {
+
+            pages.push(i+1)
+
+        }
+    }
+        let page = activePage
+        let low = (page-1)*4
+        let high = page*4
+        // let pageData = searchData.filter((a,i) => i>=low && i<high)
+
         return (
-            <div className='container-fluid'>
+            <div className='container-fluid ' >
                 <div className='row text-center' style={{ backgroundColor: 'brown' }}>
-                    <div className='col-4'><img height="150px" width="350px" className='' src="/cocktail1.jpeg" alt='' /></div>
-                    <div className='col-4 text-white ' > <h1 className='display-1 mt-3'>COCKTAIL </h1></div>
-                    <div className='col-4'><img height="150px" width="350px" className='' src="/cocktail2.jpeg" alt='' /></div>
+                    <div className='col-4 d-none d-xl-block'><img height="150px" width="350px" className='' src="/cocktail1.jpeg" alt='' /></div>
+                    <div className='col-12 col-xl-4 text-white text-center' > <h1 className='display-1 mt-3'>COCKTAIL </h1></div>
+                    <div className='col-4 d-none d-xl-block'><img height="150px" width="350px" className='' src="/cocktail2.jpeg" alt='' /></div>
                 </div>
 
                 <div className="row mt-1 py-4  bg-danger">
                     <div className='col-6 '>
-                        <input className='mr-2 p-1' style={{fontSize:"20px"}} name='name' value={name} placeholder='name' onChange={(e) => { this.handleChange(e) }} />
-                        <input className='ml-2 p-1' style={{fontSize:"20px"}} name='ingredient' value={ingredient} placeholder='ingredient' onChange={(e) => { this.handleChange(e) }} />
-                        <button className="btn btn-success ml-4 px-4" name="search" style={{fontSize:"20px"}} onClick={(e) => this.handleSubmit(e)}>Search</button>
-                        <button className="btn btn-warning ml-4 px-4" name="random" style={{fontSize:"20px"}} onClick={(e) => this.handleSubmit(e)}>Random</button>
+                        <input className='mr-1   p-1' style={{fontSize:"20px"}} name='name' value={name} placeholder='name' onChange={(e) => { this.handleChange(e) }} />
+                        <input className='ml-xl-1 mt-sm-2 mr-md-5  p-1' style={{fontSize:"20px"}} name='ingredient' value={ingredient} placeholder='ingredient' onChange={(e) => { this.handleChange(e) }} />
+                        <button className="btn btn-success mt-sm-2  mt-lg-2 mt-xl-0 ml-lg-4 ml-xl-2 px-4" name="search" style={{fontSize:"20px"}} onClick={(e) => this.handleSubmit(e)}>Search</button>
                     </div>
                     <div className='col-6'>
-                        <select className='p-1 py-2   bg-dark text-white' style={{fontSize:"20px"}} name='categories' value={categories} onChange={(e) => this.handleCategories(e)}>
+                        <select className='p-1 py-2 mt-sm-2 mt-lg-0 mt-xl-2 mr-lg-2 mr-xl-0  bg-dark text-white' style={{fontSize:"20px"}} name='categories' value={categories} onChange={(e) => this.handleCategories(e)}>
                             <option value="categories">Categories</option>
                             {categoriesList.map(item => (
                                 <option key={item.strCategory} value={item.strCategory}>{item.strCategory}</option>
                             ))}
                         </select>
-                        <select className='p-1 py-2  bg-primary text-white' style={{fontSize:"20px"}} name='ingredientSelect' value={ingredientSelect} onChange={(e) => this.handleIngredients(e)}>
+                        <select className='p-1 py-2 mt-sm-2 mt-lg-0 mr-lg-2 mt-xl-2 mr-xl-0  bg-primary text-white' style={{fontSize:"20px"}} name='ingredientSelect' value={ingredientSelect} onChange={(e) => this.handleIngredients(e)}>
                             <option value="Ingredients">Ingredients</option>
                             {ingredientsList.map(item => (
                                 <option key={item.strIngredient1}  value={item.strIngredient1}>{item.strIngredient1}</option>
                             ))}
                         </select>
-                        <select className='p-1 py-2  bg-secondary text-white' style={{fontSize:"20px"}} name='glass' value={glass} onChange={(e) => this.handleGlass(e)}>
+                        <select className='p-1 py-2 mt-sm-2  mr-lg-2 mt-xl-0 mr-xl-0 bg-secondary text-white' style={{fontSize:"20px"}} name='glass' value={glass} onChange={(e) => this.handleGlass(e)}>
                             <option value="Glass">Glass</option>
                             {glassList.map(item => (
                                 <option key={item.strGlass} value={item.strGlass}>{item.strGlass}</option>
                             ))}
                         </select>
-                        <select className='p-1 py-2 text-white' style={{fontSize:"20px", backgroundColor:"darkviolet"}} name='alcoholSelect' value={alcoholSelect} onChange={(e) => this.handleAlcohol(e)}>
+                        <select className='p-1 py-2 mt-sm-2  mr-lg-2 mt-xl-0  mr-xl-0 text-white' style={{fontSize:"20px", backgroundColor:"darkviolet"}} name='alcoholSelect' value={alcoholSelect} onChange={(e) => this.handleAlcohol(e)}>
                             <option value="A / N-A">A / N-A</option>
                             {alcoholList.map(item => (
                                 <option key={item.strAlcoholic} value={item.strAlcoholic}>{item.strAlcoholic}</option>
@@ -229,14 +277,22 @@ class Cocktail extends React.Component {
                     {
                         dataFlag ?
                             <div className="row text-white mt-2" >
-                                {searchData && searchData.map(item => <Name key={item.idDrink} items={item} />)}
+                                {searchData && searchData.filter((a,i) => i>=low && i<high).map(item => <Name key={item.idDrink} items={item} />)}
                             </div>
                             : <div className="text-center  mt-2" style={{backgroundColor:"darkorange"}}>
                                 {ingredientData && ingredientData.map(item => <Ingredient key={item.idIngredient} items={item} />)}
                             </div>
                     }
                     <div className="row text-center mt-2">
-                        {cag && cag.map(item => < Categories key={item.idDrink} items={item} />)}
+                        {cag && cag.filter((a,i) => i>=low && i<high).map(item => < Categories key={item.idDrink} items={item} />)}
+                    </div>
+
+                    <div className=" text-center  mt-2">
+                        {pages && pages.map(item => (
+                            <button className="btn btn-dark px-3 py-1 m-2" key={item} onClick={(e) => this.handlePages(e,item)}>{item}</button>
+                        ))}
+
+
                     </div>
                 </div>
 
