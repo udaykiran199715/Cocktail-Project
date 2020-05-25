@@ -55,7 +55,10 @@ class Cocktail extends React.Component {
                     dataFlag: false,
                     searchData: [],
                     ingredientData: [],
-                    dataLength:res.data.drinks.length
+                    dataLength:res.data.drinks.length,
+                    pages:[],
+                    activePage:1,
+                    pageFlag:true
 
                 })
                 // console.log(res)
@@ -75,6 +78,8 @@ class Cocktail extends React.Component {
                     cag: [],
                     pages:[],
                     dataLength:0,
+                    activePage:1,
+                    pageFlag:false
                 })
             )
     }
@@ -93,7 +98,9 @@ class Cocktail extends React.Component {
                     searchData: [],
                     ingredientData: [],
                     dataLength:res.data.drinks.length,
-                    pages:[]
+                    pages:[],
+                    activePage:1,
+                    pageFlag:true
                 })
                 // console.log(res)
             )
@@ -112,7 +119,9 @@ class Cocktail extends React.Component {
                     searchData: [],
                     ingredientData: [],
                     dataLength:res.data.drinks.length,
-                    pages:[]
+                    pages:[],
+                    activePage:1,
+                    pageFlag:true
                 })
                 // console.log(res)
             )
@@ -135,7 +144,9 @@ class Cocktail extends React.Component {
                         dataFlag: true,
                         cag: [],
                         dataLength:res.data.drinks.length,
-                        pages:[]
+                        pages:[],
+                        activePage:1,
+                        pageFlag:true
                     })
                 ).catch(err=>alert("oops not found"))
         } else if (ingredient) {
@@ -147,7 +158,9 @@ class Cocktail extends React.Component {
                         dataFlag: false,
                         cag: [],
                         pages:[],
-                        dataLength:0
+                        dataLength:0,
+                        pageFlag:false
+
                     })
                 ).catch(err => alert('oops not found'))
         }
@@ -170,9 +183,33 @@ class Cocktail extends React.Component {
     }
 
     handlePages = (e,active) => {
+        let {activePage,pages} = this.state
+        if(active === 'prev') {
+            if(Number(activePage) === 1) {
+                this.setState({
+                    activePage: 1
+                })
+            }else {
+                this.setState({
+                    activePage:activePage - 1
+                })
+            }
+        }else   if(active === 'next'  ) {
+            if(Number(activePage) === Number(pages.length)) {
+                this.setState({
+                    activePage:pages.length
+                })
+            }else {
+                this.setState({
+                    activePage:activePage + 1
+                })
+            }
+
+        }else {
         this.setState({
             activePage:active
         })
+    }
     }
     componentDidMount() {
         axios.get("https://www.thecocktaildb.com/api/json/v1/1/list.php?c=list")
@@ -205,7 +242,8 @@ class Cocktail extends React.Component {
             this.setState({
                 searchData:res.data.drinks,
                 dataFlag:true,
-                dataLength:res.data.drinks.length
+                dataLength:res.data.drinks.length,
+                pageFlag:true
             })
             )
 
@@ -215,9 +253,9 @@ class Cocktail extends React.Component {
     render() {
        // console.log(this.state.dataLength)
 
-        let { name, ingredient, searchData, ingredientData, dataFlag, categories, categoriesList, ingredientSelect, ingredientsList, glass, glassList, alcoholList, alcoholSelect, cag, pages, dataLength, activePage } = this.state
+        let { name, ingredient, searchData, ingredientData, dataFlag, categories, categoriesList, ingredientSelect, ingredientsList, glass, glassList, alcoholList, alcoholSelect, cag, pages, dataLength, activePage, pageFlag } = this.state
         let total = dataLength
-        let perPage = 4
+        let perPage = 8
         let pageCount = Math.ceil(total/perPage)
         if(pages.length === 0) {
         for(let i=0;i<pageCount;i++) {
@@ -227,8 +265,8 @@ class Cocktail extends React.Component {
         }
     }
         let page = activePage
-        let low = (page-1)*4
-        let high = page*4
+        let low = (page-1)*8
+        let high = page*8
         // let pageData = searchData.filter((a,i) => i>=low && i<high)
 
         return (
@@ -288,9 +326,16 @@ class Cocktail extends React.Component {
                     </div>
 
                     <div className=" text-center  mt-2">
-                        {pages && pages.map(item => (
-                            <button className="btn btn-dark px-3 py-1 m-2" key={item} onClick={(e) => this.handlePages(e,item)}>{item}</button>
+
+                        {pages && pageFlag &&
+                        < >
+                         <button className="btn btn-dark px-3 py-1 m-2" key={"prev"} onClick={(e) => this.handlePages(e,"prev")}>prev</button>
+                        {pages.map(item => (
+                            <button style={{color:styles.textWhite}}  className={activePage===item ?"btn bg-primary px-3 py-1 m-2 text-white" : "btn bg-dark px-3 py-1 m-2"}  key={item} onClick={(e) => this.handlePages(e,item)}>{item}</button>
                         ))}
+                          <button className="btn btn-dark px-3 py-1 m-2" key={"next"} onClick={(e) => this.handlePages(e,"next")}>next</button>
+                          </>
+                        }
 
 
                     </div>
